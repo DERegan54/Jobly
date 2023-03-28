@@ -38,6 +38,20 @@ router.post("/", ensureAdmin, async function (req, res, next) {
     return next(err);
   }
 });
+// router.post("/", ensureAdmin, async function (req, res, next) {
+//   try {
+//     const validator = jsonschema.validate(req.body, companyNewSchema);
+//     if (!validator.valid) {
+//       const errs = validator.errors.map(e => e.stack);
+//       throw new BadRequestError(errs);
+//     }
+
+//     const company = await Company.create(req.body);
+//     return res.status(201).json({ company });
+//   } catch (err) {
+//     return next(err);
+//   }
+// });
 
 /** GET /  =>
  *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
@@ -146,4 +160,4 @@ router.delete("/:handle", ensureAdmin, async function (req, res, next) {
 });
 
 
-module.exports = router;
+module.exports = {router};
