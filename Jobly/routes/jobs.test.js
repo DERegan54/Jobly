@@ -22,7 +22,7 @@ commonAfterAll(commonAfterAll);
 
 /***************************************************************** POST /jobs */
 
-describe("create", function () {
+describe("POST /jobs", function () {
     test(" admins can post job postings", async function () {
         const resp = await request(app)
             .post("/jobs")
@@ -86,7 +86,7 @@ describe("create", function () {
 
 /**************************************************************** GET /jobs */
 
-describe("findAll", function () {
+describe("GET /jobs", function () {
     test("can get jobs", async function () {
         let resp = await request(app)
         .get(`/jobs`);
@@ -157,7 +157,7 @@ describe("findAll", function () {
 
 /*************************************************************** GET /jobs */
 
-describe("get", function () {
+describe("GET /jobs/:id", function () {
     test("anonymous users can access job postings", async function () {
         const resp = await request(app)
             .get(`/jobs/${testJobIds[0]}`);
@@ -187,7 +187,7 @@ describe("get", function () {
 
 /************************************************************* PATCH /jobs/:id */
 
-describe("update", function () {
+describe("PATCH /jobs/:id", function () {
     test("admins can update job postings", async function () {
         const resp = await request(app)
             .patch(`/jobs/${testJobIds[0]}`)
@@ -249,7 +249,7 @@ describe("update", function () {
 
 /***************************************************************** DELETE /jobs/:id */
 
-describe("remove", function () {
+describe("DELETE /jobs/:id", function () {
     test("admins can delete", async function () {
         const resp = await request(app)
             .delete(`/jobs/${testJobIds[0]}`)

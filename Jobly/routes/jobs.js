@@ -13,7 +13,7 @@ const jobNewSchema = require("../schemas/jobNew.json");
 const jobUpdateSchema = require("../schemas/jobUpdate.json");
 const jobSearchSchema = require("../schemas/jobSearch.json");
 
-const router = new express.Router();
+const router = new express.Router({ mergeParams: true });
 
 /** POST / { job } 
  * Job should be { title, salary, equity, companyHandle }
