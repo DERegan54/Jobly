@@ -11,6 +11,7 @@ const Company = require("../models/company");
 
 const companyNewSchema = require("../schemas/companyNew.json");
 const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const companySearchSchema = require("../schemas/companySearch.json");
 
 const router = new express.Router();
 
@@ -21,7 +22,7 @@ const router = new express.Router();
  *
  * Returns { handle, name, description, numEmployees, logoUrl }
  *
- * Authorization required: admin (checked with ensureAdmin middleware function)
+ * Authorization required:  admin - to achieve this, replace ensureLoggedIn middleware with
  */
 
 router.post("/", ensureAdmin, async function (req, res, next) {
@@ -38,20 +39,6 @@ router.post("/", ensureAdmin, async function (req, res, next) {
     return next(err);
   }
 });
-// router.post("/", ensureAdmin, async function (req, res, next) {
-//   try {
-//     const validator = jsonschema.validate(req.body, companyNewSchema);
-//     if (!validator.valid) {
-//       const errs = validator.errors.map(e => e.stack);
-//       throw new BadRequestError(errs);
-//     }
-
-//     const company = await Company.create(req.body);
-//     return res.status(201).json({ company });
-//   } catch (err) {
-//     return next(err);
-//   }
-// });
 
 /** GET /  =>
  *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
@@ -61,42 +48,36 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  * - maxEmployees
  * - nameLike (will find case-insensitive, partial matches)
  *
- * Authorization required: none
+ * Authorization required: none, so no middleware required!
  */
-
-// line 70: Define variable 'query' as the query string
-// line 71: Try
-// line 72: Define variable 'validator' as calling the jsonschema validate method, passing in the query string and the companySearchSchema
-// line 73: If validator returns invalid, 
-// Line 74: Define variable 'errs' as the validator errors from the error stack 
-// line 75: Throw new BadRequestError(errs)
-// line 78: Define searchCriteriaArr as the array returned from query object using Object.keys(req.query)
-// line 79: If searchCriteriaArr is empty
-// line 80: Define companies as response from calling findAll() without any parameters to get all companies in database
-// line 81: Return JSON object containing all companies
-// line 782: else
-// line 83: Define filteredCompanies as response from calling findAll(req.query) so that the parameters are passed into findAll() method
-// line 84: Return JSON object containing only companies filtered by searchCriteria
-// line 86: Catch errors
-// line 87: Return errors
-
+ 
+// line 68: Define query as the query made to the API request.query
+// lines 69-70 : the query values are strings, so we convert them to integers
+// line 72: Try
+// line 73: Define validator as passing the query and companySearchSchema into jsonschema.validate() method
+//          to ensure that the query is valid
+// line 74: If the validator returns invalid
+// line 75: Define errs as the errors mapped into the stack so we can see them in the terminal
+// line 76: Throw new BadRequestError(errs) with the above errors printed to the terminal
+// line 79: Define companies as the response we get when the API is queried with our without our query string 
+//        via the findAll() method defined in the Company model.
+// line 80: Return the requested companies in json format
+// line 81: Catch error
+// line 82: Return next with the err.
 router.get("/", async function (req, res, next) {
   const query = req.query;
+  if(query.minEmployees !== undefined) query.minEmployees = +query.minEmployees;
+  if(query.maxEmployees !== undefined) query.maxEmployees = +query.maxEmployees;
+  
   try {
     const validator = jsonschema.validate(query, companySearchSchema);
     if(!validator.valid) {
       const errs = validator.errors.map(e => e.stack);
       throw new BadRequestError(errs);
     }
-    
-    const searchCriteriaArr = Object.keys(query);
-    if(searchCriteriaArr.length === 0){
-      const companies = await Company.findAll();
-      return res.json({ companies });
-    } else {
-      const filteredCompanies = await Company.findAll(query)
-      return res.json({ filteredCompanies })
-    }
+
+    const companies = await Company.findAll(query);
+    return res.json({ companies });
   } catch (err) {
     return next(err);
   }
@@ -105,7 +86,7 @@ router.get("/", async function (req, res, next) {
 /** GET /[handle]  =>  { company }
  *
  *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, companyHandle}, ...]
+ *   where jobs is [{ id, title, salary, equity }, ...]
  *
  * Authorization required: none
  */
@@ -127,7 +108,7 @@ router.get("/:handle", async function (req, res, next) {
  *
  * Returns { handle, name, description, numEmployees, logo_url }
  *
- * Authorization required: admin (checked with ensureAdmin middleware function)
+ * Authorization required: admin - to achieve this, replace ensureLoggedIn middleware with
  */
 
 router.patch("/:handle", ensureAdmin, async function (req, res, next) {
@@ -147,7 +128,7 @@ router.patch("/:handle", ensureAdmin, async function (req, res, next) {
 
 /** DELETE /[handle]  =>  { deleted: handle }
  *
- * Authorization: admin (checked with ensureAdmin middleware function)
+ * Authorization: admin - to achieve this, replace ensureLoggedIn middleware with
  */
 
 router.delete("/:handle", ensureAdmin, async function (req, res, next) {
@@ -160,4 +141,4 @@ router.delete("/:handle", ensureAdmin, async function (req, res, next) {
 });
 
 
-module.exports = {router};
+module.exports = router;

@@ -24,7 +24,7 @@ const router = express.Router();
  * This returns the newly created user and an authentication token for them:
  *  {user: { username, firstName, lastName, email, isAdmin }, token }
  *
- * Authorization required: admin (check with ensureAdmin middleware function)
+ * Authorization required: admin - to achieve this, replace ensureLoggedIn middleware with
  **/
 
 router.post("/", ensureAdmin, async function (req, res, next) {
@@ -43,37 +43,12 @@ router.post("/", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** POST /users/:username/job/:id  { username, jobId } => { applied: jobId }
- * 
- *  Allows registered user to apply for jobs on Jobly by posting the username and jobId to 
- *    the applications table in the database 
- *  
- *  Returns { applied: jobId }
- *  
- *  Authorizaton required: registerd user or admin (check with ensureCorrectUserOrAdmin middleware function)
- */
-
-// line 64: Try
-// line 65: Makes request API for user to "apply for a job" via the applyForJob method from the User class
-// line 66: Return status code 201 and JSON object {applied: JobId} (the JobId is in the form of req.params.id)
-//        confirming that the user has applied for the job
-// line 67: Catch
-// line 68: Return error
-
-router.post("/users/:username/job/:id", ensureCorrectUserOrAdmin, async function (req, res, next) {
-  try {
-    await User.applyForJob(req.params.username, req.params.id);
-    return res.status(201).json({applied: req.params.id});
-  } catch (err) {
-    return next(err);
-  }
-});
 
 /** GET / => { users: [ {username, firstName, lastName, email }, ... ] }
  *
  * Returns list of all users.
  *
- * Authorization required: admin (check with ensureAdmin middleware function)
+ * Authorization required: admin - to achieve this, replace ensureLoggedIn middleware with
  **/
 
 router.get("/", ensureAdmin, async function (req, res, next) {
@@ -88,11 +63,9 @@ router.get("/", ensureAdmin, async function (req, res, next) {
 
 /** GET /[username] => { user }
  *
- * Returns { username, firstName, lastName, isAdmin } where jobs that user has applied to is
- *  {id, title, salary, equity, companyHandle}
- * 
+ * Returns { username, firstName, lastName, isAdmin }
  *
- * Authorization required: logged in user or admin (checked with ensureCorrectUserOrAdmin middleware function)
+ * Authorization required: logged in user or admin (checked with ensureCorrectUserOrAdmin 
  **/
 
 router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
@@ -112,9 +85,8 @@ router.get("/:username", ensureCorrectUserOrAdmin, async function (req, res, nex
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: logged in user or admin (checked with ensureCorrectUserOrAdmin middleware function)
+ * Authorization required: logged in user or admin (checked with ensureCorrectUserOrAdmin 
  **/
- 
 
 router.patch("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
   try {
@@ -134,13 +106,29 @@ router.patch("/:username", ensureCorrectUserOrAdmin, async function (req, res, n
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: logged in user or admin (checked with ensureCorrectUserOrAdmin middleware function)
+ * Authorization required: logged in user or admin (checked with ensureCorrectUserOrAdmin 
  **/
 
 router.delete("/:username", ensureCorrectUserOrAdmin, async function (req, res, next) {
   try {
     await User.remove(req.params.username);
     return res.json({ deleted: req.params.username });
+  } catch (err) {
+    return next(err);
+  }
+});
+
+/** POST /[username]/jobs/[id]  => { applied: jobId} 
+ * 
+ * Authorization required: logged in user (checked with ensureCorrectUserOrAdmin middleware function)
+*/
+
+
+router.post("/username/jobs/:id", ensureCorrectUserOrAdmin , async function (req, res, next) {
+  try {
+    const jobId = +req.params.id;
+    await User.applyForJob(req.params.username, jobId);
+    return res.json({ applied: jobId });
   } catch (err) {
     return next(err);
   }

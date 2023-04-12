@@ -1,7 +1,7 @@
 {
-  "name": "jobly-solution",
+  "name": "jobly",
   "version": "2.0.0",
-  "description": "This is the Express backend for Jobly, version 2.",
+  "description": "",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -18,7 +18,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.0",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.19.0",
     "colors": "^1.4.0",
     "cors": "^2.8.5",
@@ -33,3 +33,4 @@
     "supertest": "^5.0.0-0"
   }
 }
+

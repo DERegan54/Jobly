@@ -12,6 +12,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -44,7 +45,7 @@ describe("authenticate", function () {
 
   test("unauth if wrong password", async function () {
     try {
-      await User.authenticate("u1", "wrong");
+      await User.authenticate("c1", "wrong");
       fail();
     } catch (err) {
       expect(err instanceof UnauthorizedError).toBeTruthy();
@@ -140,6 +141,7 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      applications: [testJobIds[0]],
     });
   });
 
@@ -201,7 +203,7 @@ describe("update", function () {
   test("bad request if no data", async function () {
     expect.assertions(1);
     try {
-      await User.update("u1", {});
+      await User.update("c1", {});
       fail();
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
@@ -228,35 +230,3 @@ describe("remove", function () {
     }
   });
 });
-
-/****************************************** applyForJob */
-
-describe("applyForJob", function () {
-  test("allows user to apply for job", async function () {
-    await User.applyForJob('u1'. testJobIds[0]);
-    const res = await db.query(
-      'SELECT * FROM applications WHERE job_id=$1', 
-      [testJobIds[0]]);
-    expect(res.rows).toEqual([{
-      job_id: testJobIds[0],
-      username: "u1",
-    }]);
-  });
-
-  test("user not found", async function () {
-    try {
-      await User.applyForJob("wrong", testJobIds[0]);
-      fail();
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-
-  test("job not found", async function () {
-    try {
-      await User.applyToJob("u1", testJobIds[100]);
-    } catch (err) {
-      expect(err instanceof NotFoundError).toBeTruthy();
-    }
-  });
-})

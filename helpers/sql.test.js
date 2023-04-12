@@ -1,32 +1,21 @@
+const {sqlForPartialUpdate} = require('./sql');
 
-const { BadRequestError } = require("../expressError");
-const { sqlForPartialUpdate } = require("./sql");
-
-
-describe("sqlForPartialUpdate", function () {
-  test("works: 1 item", function () {
-    const result = sqlForPartialUpdate(
-        { firstName: "Anna" },
-        { firstName: "Ava", age: 20 });
-    expect(result).toEqual({
-      setCols: '"Ava"=$1',
-      values: ["Anna"],
+describe("sqlForPartialupdate", function () {
+    test('updates a user', function () {
+        const dataToUpdate = {
+            firstName: "Angie",
+            lastName: "Smith"
+        }
+        const jsToSql = {
+            firstName: "first_name",
+            lastName: "last_name"
+        }
+        const { setCols, values } = sqlForPartialUpdate(dataToUpdate, jsToSql);
+        expect(setCols).toEqual(`"${jsToSql.firstName}"=$1, "${jsToSql.lastName}"=$2`);
+        expect(values).toEqual([dataToUpdate.firstName, dataToUpdate.lastName]);
     });
-  });
 
-  test("works: 2 items", function () {
-    const result = sqlForPartialUpdate({ firstName: "Anna", age: 20 }, { firstName: "Ava" });
-    expect(result).toEqual({
-      setCols: '"Ava"=$1, "age"=$2',
-      values: ["Anna", 20],
+    test("Error with no data", function () {
+        expect(() => { sqlForPartialUpdate({}, {}) }).toThrow("No data");
     });
-  });
-
-  test('throws error when submitted without data', function () {
-    try {
-        sqlForPartialUpdate({}, {firstName: "Ava", age: 20});
-    } catch (err) {
-        expect(err instanceof BadRequestError).toBeTruthy();
-    }
-  });
 });

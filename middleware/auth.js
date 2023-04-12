@@ -42,27 +42,33 @@ function ensureLoggedIn(req, res, next) {
   }
 }
 
+
 // For use when the user must be logged in as admin
+// To do this, check if the user object's isAdmin boolean is true in the payload
 // If not, throw Unauthorized error
+
 function ensureAdmin(req, res, next) {
   try {
-    if(!res.locals,user || !res.locals.user.isAdmin) {
+    if(!res.locals.user || !res.locals.user.isAdmin) {
       throw new UnauthorizedError();
     }
     return next();
   } catch (err) {
     return next(err);
   }
-}
+} 
 
-// For use when user must provide a valid token and be have a matching username
+
+// For use when the user must either be logged in as the correct user or must be admin
+// To do this, check if the user's username matches the one in req.params AND check that 
+//    an adminToken is provided.
 // If not, throw Unauthorized error
 
 function ensureCorrectUserOrAdmin(req, res, next) {
   try {
     const user = res.locals.user;
-    if((!user && (user.isAdmin || user.username === req.params.username))) {
-      throw new UnauthorizedError();
+    if(!(user && (user.isAdmin || user.username === req.params.username))) {
+      throw new UnauthorizedError()
     }
     return next();
   } catch (err) {
@@ -70,7 +76,10 @@ function ensureCorrectUserOrAdmin(req, res, next) {
   }
 }
 
+
 module.exports = {
   authenticateJWT,
   ensureLoggedIn,
+  ensureAdmin,
+  ensureCorrectUserOrAdmin
 };

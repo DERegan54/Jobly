@@ -41,7 +41,7 @@ class User {
       // compare hashed password to a new hash from password
       const isValid = await bcrypt.compare(password, user.password);
       if (isValid === true) {
-        delete user.password; // Why is the user.password being deleted upon authentication?
+        delete user.password;
         return user;
       }
     }
@@ -123,14 +123,6 @@ class User {
    * Throws NotFoundError if user not found.
    **/
 
-  // line 135: Define variable "userRes" as the response received by querying the users table by username 
-  // line 146: Define variable "user" as the row returned from the above query
-  // line 148: If the username is not found in the database, throw NotFoundError
-  // line 150: Define variable "userJobsAppliedRes" as the response received by querying the applications table
-  // line 156: Define "user.applications" the result from mapping the applications returned from the above query
-  //        to the correct JobIds.  This also attaches the applications to the returned "user"
-  // line 157: Return the correct user along with data on jobs the user has applied to
-
   static async get(username) {
     const userRes = await db.query(
           `SELECT username,
@@ -147,13 +139,13 @@ class User {
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
 
-    const userJobsAppliedRes = await db.query(
-          `SELECT a.job_id
-           FROM applications AS a
-          WHERE a.username = $1`,
-          [username]);
-    
-    user.applications = userJobsAppliedRes.rows.map(a => a.job_id);
+    const userApplicationsRes = await db.query(
+      `SELECT a.job_id
+       FROM applications AS a
+       WHERE a.username = $1`, [username]);
+
+user.applications = userApplicationsRes.rows.map(a => a.job_id);
+
     return user;
   }
 
@@ -220,54 +212,36 @@ class User {
     if (!user) throw new NotFoundError(`No user: ${username}`);
   }
 
-  /** Apply for a job
-   * 
-   *  Updates applications table in database.
-   *  Returns undefined.
-   *  Parameters: username is username of applicant
-   *              jobId is the id of the job applying for.
-   */
 
-  // line 227: The applyForJobs function allow registered users to apply for jobs posted on Jobly
-  // line 228: Define variable "getJob" as query to jobs table for jobId passed in as parameter
-  // line 233: Define variable "job" as response from database for the above query
-  // line 236: If the jobId is not in the database,
-  // line 237: Throw new NotFoundError
-  // line 239: Define variable "getApplicant" as query to the users table for username passed in as parameter
-  // line 244: Define variable "applicant" as response from database for above query
-  // line 246: If the username is not in the database
-  // line 247: Throw new NotFoundError
-  // line 250: Database query that inserts the jobId and username into the applications table of the database
+  /** Apply for a job: updates database
+ * Takes in parameters: username (user applying to the job)
+ *                      jobId: (job the user is applying to)
+ */
 
   static async applyForJob(username, jobId) {
-    const getJob = await db.query(
+    const findJob = await db.query(
         `SELECT id
          FROM jobs
          WHERE id = $1`, 
-        [jobId]);
-    const job = getJob.rows[0];
+      [jobId]);
+    const job = findJob.rows[0];
 
-    if (!job) {
-      throw new NotFoundError(`Job not found: ${jobId}`);
-    }
+    if(!job) throw new NotFoundError(`Job not found: ${jobId}`);
 
-    const getApplicant = await db.query(
-          `SELECT username
-           FROM users
-           WHERE username= $1`,
-          [username]);
-    const applicant = getApplicant.rows[0];
+    const findUser = await db.query(
+        `SELECT username
+         FROM users
+         WHERE username = $1`, 
+      [username]);
+    const user  = findUser.rows[0];
 
-    if (!applicant) {
-      throw new NotFoundError(`User not found: ${username}`);
-    }
+    if(!user) throw new NotFoundError(`User not found: ${username}`);
 
     await db.query(
-          `INSERT INTO applications(job_id, username)
-           VALUES($1, $2)`,
-          [jobId, username]);
-  }
+        `INSERT INTO applications (job_id, username)
+         VALUES ($1, $2)`,
+        [jobId, username]);
+  } 
 }
-
 
 module.exports = User;

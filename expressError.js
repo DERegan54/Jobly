@@ -1,49 +1,53 @@
-/** ExpressError extends the normal JS error so we can easily
+/** ExpressError extends normal JS error so we can
  *  add a status when we make an instance of it.
  *
  *  The error-handling middleware will return this.
  */
 
 class ExpressError extends Error {
-    constructor(message, status) {
-      super();
-      this.message = message;
-      this.status = status;
-      console.error(this.stack);
-    }
+  constructor(message, status) {
+    super();
+    this.message = message;
+    this.status = status;
   }
+}
 
-// 404 NOT FOUND Error
+/** 404 NOT FOUND error. */
 
 class NotFoundError extends ExpressError {
-    constructor(message = "NOT FOUND!") {
-        super(message, 404);
-    }
+  constructor(message = "Not Found") {
+    super(message, 404);
   }
-  
-// 400 UNAUTHORIZED Error 
+}
+
+/** 401 UNAUTHORIZED error. */
 
 class UnauthorizedError extends ExpressError {
-    constructor(message = "UNAUTHORIZED!") {
-        super(message, 401);
-    }
+  constructor(message = "Unauthorized") {
+    super(message, 401);
   }
+}
 
-// 400 BAD REQUEST error
+/** 400 BAD REQUEST error. */
 
 class BadRequestError extends ExpressError {
-    constructor(message = "BAD REQUEST!") {
-        super(message, 400);
-    }
+  constructor(message = "Bad Request") {
+    super(message, 400);
+  }
 }
 
-// 403 FORBIDDEN error
+/** 403 BAD REQUEST error. */
 
 class ForbiddenError extends ExpressError {
-    constructor(message = "FORBIDDEN!") {
-        super(message, 403);
-    }
+  constructor(message = "Bad Request") {
+    super(message, 403);
+  }
 }
 
-
-module.exports = {ExpressError, NotFoundError, UnauthorizedError, BadRequestError, ForbiddenError}
+module.exports = {
+  ExpressError,
+  NotFoundError,
+  UnauthorizedError,
+  BadRequestError,
+  ForbiddenError,
+};

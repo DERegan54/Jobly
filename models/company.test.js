@@ -8,6 +8,7 @@ const {
   commonBeforeEach,
   commonAfterEach,
   commonAfterAll,
+  testJobIds,
 } = require("./_testCommon");
 
 beforeAll(commonBeforeAll);
@@ -59,7 +60,7 @@ describe("create", function () {
 /************************************** findAll */
 
 describe("findAll", function () {
-  test("returns all companies, no filters", async function () {
+  test("works: no filter", async function () {
     let companies = await Company.findAll();
     expect(companies).toEqual([
       {
@@ -86,23 +87,9 @@ describe("findAll", function () {
     ]);
   });
 
-  test("returns company with name filter ", async function () {
-    const searchCriteria = {name: C2};
-    let filteredCompanies = await Company.findAll(searchCriteria);
-    expect(filteredCompanies).toEqual([
-      {
-        handle: "c2",
-        name: "C2",
-        description: "Desc2",
-        numEmployees: 2,
-        logoUrl: "http://c2.img",
-      },])
-  });
-
-  test("returns companies with minEmployees filter", async function () {
-    const searchCriteria = {minEmployees: 2};
-    let filteredCompanies = await Company.findAll(searchCriteria);
-    expect(filteredCompanies).toEqual([
+  test("filter by min employees", async function () {
+    let companies = await Company.findAll({ minEmployees: 2});
+    expect(companies).toEqual([
       {
         handle: "c2",
         name: "C2",
@@ -116,58 +103,18 @@ describe("findAll", function () {
         description: "Desc3",
         numEmployees: 3,
         logoUrl: "http://c3.img",
-      },])
-  });
+      }
+    ])
+  })
 
-  test("returns companies with maxEmployees filter ", async function () {
-    const searchCriteria = {maxEmployees: 2};
-    let filteredCompanies = await Company.findAll(searchCriteria);
-    expect(filteredCompanies).toEqual([
+  test("filter by max employees", async function () {
+    let companies = await Company.findAll({ maxEmployees: 2 });
+    expect(companies).toEqual([
       {
         handle: "c1",
         name: "C1",
         description: "Desc1",
-        numEmployees: 1,
-        logoUrl: "http://c1.img",
-      },
-      {
-        handle: "c2",
-        name: "C2",
-        description: "Desc2",
-        numEmployees: 2,
-        logoUrl: "http://c2.img",
-      },])
-  });
-
-  test("returns companies with min Employees and maxEmployees filters ", async function () {
-    const searchCriteria = {minEmployees: 1, maxEmployees: 2};
-    let filteredCompanies = await Company.findAll(searchCriteria);
-    expect(filteredCompanies).toEqual([
-      {
-        handle: "c1",
-        name: "C1",
-        description: "Desc1",
-        numEmployees: 1,
-        logoUrl: "http://c1.img",
-      },
-      {
-        handle: "c2",
-        name: "C2",
-        description: "Desc2",
-        numEmployees: 2,
-        logoUrl: "http://c2.img",
-      },])
-  });
-
-  test("returns companies with all filters", async function () {
-    const searchCriteria = {name: C1, minEmployees: 1, maxEmployees:10};
-    let filteredCompanies = await Company.findAll(searchCriteria);
-    expect(filteredCompanies).toEqual([
-      {
-        handle: "c1",
-        name: "C1",
-        description: "Desc1",
-        numEmployees: 1,
+        numEmployees: 1, 
         logoUrl: "http://c1.img",
       },
       {
@@ -177,23 +124,48 @@ describe("findAll", function () {
         numEmployees: 2,
         logoUrl: "http://c2.img",
       },
+    ]);
+  })
+
+  test("filter by both min and max employees", async function () {
+    let companies = await Company.findAll({ minEmployees: 1, maxEmployees: 1});
+    expect(companies).toEqual([
       {
-        handle: "c3",
-        name: "C3",
-        description: "Desc3",
-        numEmployees: 3,
-        logoUrl: "http://c3.img",
-      },]);
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    ]);
   });
 
-  test("fails when min > max", async function () {
+  test("filter by name", async function () {
+    let companies = await Company.findAll({ name: "1" });
+    expect(companies).toEqual([
+      {
+        handle: "c1",
+        name: "C1",
+        description: "Desc1",
+        numEmployees: 1,
+        logoUrl: "http://c1.img",
+      },
+    ]);
+  });
+
+  test("returns empty array on not found", async function () {
+    let companies = await Company.findAll({ name: "none" });
+    expect(companies).toEqual([]);
+  });
+  
+  test("throws error if min > max", async function() {
     try {
-      await Company.findAll({minEmployees:8, maxEmployees: 2});
+      await Company.findAll({ minEmployees: 10, maxEmployees: 1 });
       fail();
     } catch (err) {
       expect(err instanceof BadRequestError).toBeTruthy();
     }
-  })
+  });
 });
 
 /************************************** get */
@@ -208,11 +180,11 @@ describe("get", function () {
       numEmployees: 1,
       logoUrl: "http://c1.img",
       jobs: [
-        {id: testJobIds[0], title: "Job1", salary: 22000, equity: "0.1"},
-        {id: testJobIds[1], title: "Job2", salary: 30000, equity: "0"},
-        {id: testJobIds[2], title: "Job3", salary: 4500, equity: "0.2"},
-        {id: testJobIds[3], title: "Job4", salary: null, equity: null},
-      ]
+        { id: testJobIds[0], title: "Job1", salary: 100, equity: "0.1" },
+        { id: testJobIds[1], title: "Job2", salary: 200, equity: "0.2" },
+        { id: testJobIds[2], title: "Job3", salary: 300, equity: "0" },
+        { id: testJobIds[3], title: "Job4", salary: null, equity: null },
+      ],
     });
   });
 
