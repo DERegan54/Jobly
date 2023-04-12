@@ -50,20 +50,20 @@ router.post("/", ensureAdmin, async function (req, res, next) {
  *
  * Authorization required: none, so no middleware required!
  */
-// 
-// line : Define query as the query made to the API request.query
-// lines - : the query values in the query strings are string, so we convert them to integers
-// line : try
-// line : Define validator as passing the query and companySearchSchema into jsonschema.validate() method
-//        to ensure that the query is valid
-// line : If the validator returns invalid
-// line : Define errs as the errors mapped into the stack so we can see them in the terminal
-// line : Throw new BadRequestError(errs) with the above errors printed to the terminal
-// line : Define companies as the response we get when the API is queried with our without our query string 
+ 
+// line 68: Define query as the query made to the API request.query
+// lines 69-70 : the query values are strings, so we convert them to integers
+// line 72: Try
+// line 73: Define validator as passing the query and companySearchSchema into jsonschema.validate() method
+//          to ensure that the query is valid
+// line 74: If the validator returns invalid
+// line 75: Define errs as the errors mapped into the stack so we can see them in the terminal
+// line 76: Throw new BadRequestError(errs) with the above errors printed to the terminal
+// line 79: Define companies as the response we get when the API is queried with our without our query string 
 //        via the findAll() method defined in the Company model.
-// line : Return the requested companies in json format
-// line : Catch error
-// line : Return next with the err.
+// line 80: Return the requested companies in json format
+// line 81: Catch error
+// line 82: Return next with the err.
 router.get("/", async function (req, res, next) {
   const query = req.query;
   if(query.minEmployees !== undefined) query.minEmployees = +query.minEmployees;
