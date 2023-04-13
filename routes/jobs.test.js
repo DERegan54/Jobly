@@ -15,10 +15,10 @@ const {
     testJobIds,
 } = require("./_testCommon");
 
-commonBeforeAll(commonBeforeAll);
-commonBeforeEach(commonBeforeEach);
-commonAfterEach(commonAfterEach);
-commonAfterAll(commonAfterAll);
+beforeAll(commonBeforeAll);
+beforeEach(commonBeforeEach);
+afterEach(commonAfterEach);
+afterAll(commonAfterAll);
 
 /***************************************************************** POST /jobs */
 
@@ -147,12 +147,12 @@ describe("GET /jobs", function () {
     });
 
 
-    // test("throws error on invalid filter criteria", async function () {
-    //     let resp = await request(app)
-    //         .get(`/jobs`)
-    //         .query({ wrong: none});
-    //     expect(resp.statusCode).toEqual(400);
-    // });
+    test("throws error on invalid filter criteria", async function () {
+        let resp = await request(app)
+            .get(`/jobs`)
+            .query({ wrong: null});
+        expect(resp.statusCode).toEqual(400);
+    });
 });
 
 /*************************************************************** GET /jobs */
@@ -164,8 +164,8 @@ describe("GET /jobs/:id", function () {
         expect(resp.body).toEqual({
             job: {
                 id: testJobIds[0],
-                title: "Job1",
-                salary: 100,
+                title: "J1",
+                salary: 1,
                 equity: "0.1",
                 company: {
                     handle: "c1",
@@ -199,7 +199,7 @@ describe("PATCH /jobs/:id", function () {
             job: {
                 id: expect.any(Number),
                 title: "Updated Job", 
-                salary: 10000,
+                salary: 1,
                 equity: "0.1",
                 companyHandle: "c1",
             },

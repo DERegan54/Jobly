@@ -76,7 +76,7 @@ describe("findAll", function () {
     });
 
     test("find companies with title filter", async function () {
-        let jobs = await Job.findAll({ title: "1"});
+        let jobs = await Job.findAll({ title: "Job1"});
         expect(jobs).toEqual([
             {
                 id: testJobIds[0],
